@@ -24,6 +24,7 @@ app.use(
       "Referer",
       "User-Agent",
       "X-CSRF-Token",
+      "Content-Security-Policy",
     ],
     maxAge: 86400,
     preflightContinue: false,
@@ -40,10 +41,11 @@ const minioClient = new Minio.Client({
 });
 
 const BUCKET_NAME = "sobee-bucket";
+const FIELD_NAME = "upload";
 
 app.post(
   "/upload",
-  Multer({ storage: Multer.memoryStorage() }).single("upload"),
+  Multer({ storage: Multer.memoryStorage() }).single(FIELD_NAME),
   function (request, response) {
     minioClient.putObject(
       BUCKET_NAME,
@@ -51,7 +53,7 @@ app.post(
       request.file.buffer,
       function (error, etag) {
         if (error) {
-          return console.log(error);
+          return response.status(500).send(error);
         }
         response.send(request.file);
       }
@@ -60,8 +62,8 @@ app.post(
 );
 
 app.post(
-  "/uploadfile",
-  Multer({ dest: "./uploads/" }).single("upload"),
+  "/upload-file",
+  Multer({ dest: "./uploads/" }).single(FIELD_NAME),
   function (request, response) {
     minioClient.fPutObject(
       BUCKET_NAME,
@@ -70,7 +72,7 @@ app.post(
       { "Content-Type": request.file.mimetype },
       function (error, etag) {
         if (error) {
-          return console.log(error);
+          return response.status(500).send(error);
         }
         response.send(request.file);
       }
@@ -80,7 +82,7 @@ app.post(
 
 app.get("/download", function (request, response) {
   minioClient.getObject(
-    "sobee-bucket",
+    BUCKET_NAME,
     request.query.filename,
     function (error, stream) {
       if (error) {
