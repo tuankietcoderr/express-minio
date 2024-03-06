@@ -93,6 +93,17 @@ app.get("/download", function (request, response) {
   );
 });
 
+app.get("/list", function (request, response) {
+  const stream = minioClient.listObjects(BUCKET_NAME, "", true);
+  const data = [];
+  stream.on("data", function (obj) {
+    data.push(obj);
+  });
+  stream.on("end", function () {
+    response.send(data);
+  });
+});
+
 minioClient.bucketExists(BUCKET_NAME, function (error) {
   if (error) {
     return console.log(error);

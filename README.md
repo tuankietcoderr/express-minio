@@ -30,6 +30,10 @@ This is a simple example of how to use Minio with Express.
 
 ![GET /download](/assets/postman-download.png)
 
+## GET /list
+
+![GET /list](/assets/postman-list.png)
+
 ## Sample load file to web page
 
 ```html
